@@ -25,7 +25,7 @@ on:
       - .gitignore
 
 jobs:
-  check-other-targets:
+  check:
     name: Type checking (${{ matrix.target.name }})
     runs-on: ubuntu-20.04
     if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) || github.event_name == 'push' }}
@@ -49,7 +49,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.36
+          toolchain: 1.28
           target: ${{ matrix.target.triple }}
           override: true
 
@@ -58,7 +58,7 @@ jobs:
         with:
           key: ${{ matrix.target.triple }}
 
-      - name: Check feature powerset
+      - name: Type checking
         uses: actions-rs/cargo@v1
         with:
           command: check
