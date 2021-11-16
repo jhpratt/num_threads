@@ -2,9 +2,13 @@ use std::fs;
 use std::num::NonZeroUsize;
 
 pub(crate) fn num_threads() -> Option<NonZeroUsize> {
-    fs::read_dir("/proc/self/task")
-        // If we can't read the directory, return `None`.
+    fs::read_to_string("/proc/self/stat")
         .ok()
-        // The number of files in the directory is the number of threads.
-        .and_then(|tasks| NonZeroUsize::new(tasks.count()))
+        .as_ref()
+        // Skip past the pid and (process name) fields
+        .and_then(|stat| stat.rsplit(')').next())
+        // 20th field, less the two we skipped
+        .and_then(|rstat| rstat.split_whitespace().nth(17))
+        .and_then(|num_threads| num_threads.parse::<usize>().ok())
+        .and_then(NonZeroUsize::new)
 }
