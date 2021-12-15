@@ -1,5 +1,7 @@
 //! Minimum supported Rust version: 1.28
 
+extern crate libc;
+
 use std::num::NonZeroUsize;
 
 #[cfg_attr(target_os = "linux", path = "linux.rs")]
