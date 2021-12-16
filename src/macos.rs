@@ -7,6 +7,9 @@ const PROC_TASKINFO_SIZE: usize = mem::size_of::<libc::proc_taskinfo>();
 
 pub(crate) fn num_threads() -> Option<NonZeroUsize> {
     let buffer = unsafe { libc::malloc(PROC_TASKINFO_SIZE) };
+    if buffer.is_null() {
+        return None;
+    }
 
     let result = unsafe {
         libc::proc_pidinfo(
