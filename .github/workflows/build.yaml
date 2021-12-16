@@ -36,8 +36,8 @@ jobs:
           #  triple: x86_64-pc-windows-gnu
           - name: Linux
             triple: x86_64-unknown-linux-gnu
-          # - name: macOS
-          #   triple: x86_64-apple-darwin
+          - name: macOS
+            triple: x86_64-apple-darwin
           - name: FreeBSD
             triple: x86_64-unknown-freebsd
 
