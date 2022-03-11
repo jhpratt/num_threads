@@ -18,3 +18,47 @@ pub fn num_threads() -> Option<NonZeroUsize> {
 pub fn is_single_threaded() -> Option<bool> {
     num_threads().map(|n| n.get() == 1)
 }
+
+#[cfg(test)]
+mod test {
+    use std::num::NonZeroUsize;
+
+    // Run each expression in its own thread.
+    macro_rules! threaded {
+        ($first:expr;) => {
+            $first;
+        };
+        ($first:expr; $($rest:expr;)*) => {
+            $first;
+            ::std::thread::spawn(|| {
+                threaded!($($rest;)*);
+            })
+            .join()
+            .unwrap();
+        };
+    }
+
+    #[test]
+    fn num_threads() {
+        threaded! {
+            assert_eq!(super::num_threads().map(NonZeroUsize::get), Some(1));
+            assert_eq!(super::num_threads().map(NonZeroUsize::get), Some(2));
+            assert_eq!(super::num_threads().map(NonZeroUsize::get), Some(3));
+            assert_eq!(super::num_threads().map(NonZeroUsize::get), Some(4));
+            assert_eq!(super::num_threads().map(NonZeroUsize::get), Some(5));
+            assert_eq!(super::num_threads().map(NonZeroUsize::get), Some(6));
+        }
+    }
+
+    #[test]
+    fn is_single_threaded() {
+        threaded! {
+            assert_eq!(super::is_single_threaded(), Some(true));
+            assert_eq!(super::is_single_threaded(), Some(false));
+            assert_eq!(super::is_single_threaded(), Some(false));
+            assert_eq!(super::is_single_threaded(), Some(false));
+            assert_eq!(super::is_single_threaded(), Some(false));
+            assert_eq!(super::is_single_threaded(), Some(false));
+        }
+    }
+}
