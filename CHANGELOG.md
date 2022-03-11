@@ -1,3 +1,7 @@
+# Unreleased
+
+- Modified MacOS implementation to be friendly towards Apple app store review guidelines.
+
 # 0.1.2
 
 - Add support for MacOS
