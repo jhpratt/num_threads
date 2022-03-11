@@ -1,6 +1,10 @@
-# Unreleased
+# 0.1.4
 
 - Modified MacOS implementation to be friendly towards Apple app store review guidelines.
+
+# 0.1.3
+
+- Avoid heap allocation on MacOS.
 
 # 0.1.2
 
