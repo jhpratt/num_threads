@@ -40,6 +40,8 @@ jobs:
             triple: aarch64-linux-android
           - name: macOS
             triple: x86_64-apple-darwin
+          - name: iOS
+            triple: aarch64-apple-ios
           - name: FreeBSD
             triple: x86_64-unknown-freebsd
 
