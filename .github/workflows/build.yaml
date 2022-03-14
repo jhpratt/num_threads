@@ -36,6 +36,8 @@ jobs:
           #  triple: x86_64-pc-windows-gnu
           - name: Linux
             triple: x86_64-unknown-linux-gnu
+          - name: Android
+            triple: aarch64-linux-android
           - name: macOS
             triple: x86_64-apple-darwin
           - name: FreeBSD

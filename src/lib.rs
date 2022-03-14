@@ -2,7 +2,7 @@
 
 use std::num::NonZeroUsize;
 
-#[cfg_attr(target_os = "linux", path = "linux.rs")]
+#[cfg_attr(any(target_os = "linux", target_os = "android"), path = "linux.rs")]
 #[cfg_attr(target_os = "freebsd", path = "freebsd.rs")]
 #[cfg_attr(target_os = "macos", path = "macos.rs")]
 mod imp;
