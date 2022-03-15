@@ -1,3 +1,7 @@
+# Unreleased
+- Added support for Android
+- Added support for iOS
+
 # 0.1.4
 
 - Modified MacOS implementation to be friendly towards Apple app store review guidelines.

@@ -27,7 +27,7 @@ on:
 jobs:
   check:
     name: Type checking (${{ matrix.target.name }})
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.target.host }}
     if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) || github.event_name == 'push' }}
     strategy:
       matrix:
@@ -36,10 +36,19 @@ jobs:
           #  triple: x86_64-pc-windows-gnu
           - name: Linux
             triple: x86_64-unknown-linux-gnu
+            host: ubuntu-latest
+          - name: Android
+            triple: aarch64-linux-android
+            host: ubuntu-latest
           - name: macOS
             triple: x86_64-apple-darwin
+            host: macos-latest
+          - name: iOS
+            triple: aarch64-apple-ios
+            host: macos-latest
           - name: FreeBSD
             triple: x86_64-unknown-freebsd
+            host: ubuntu-latest
 
     steps:
       - name: Checkout sources
