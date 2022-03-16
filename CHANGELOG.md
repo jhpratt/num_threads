@@ -1,6 +1,5 @@
-# Unreleased
-- Added support for Android
-- Added support for iOS
+# 0.1.5
+- Add support for Android and iOS
 
 # 0.1.4
 
