@@ -5,6 +5,7 @@ use std::num::NonZeroUsize;
 #[cfg_attr(any(target_os = "linux", target_os = "android"), path = "linux.rs")]
 #[cfg_attr(target_os = "freebsd", path = "freebsd.rs")]
 #[cfg_attr(any(target_os = "macos", target_os = "ios"), path = "apple.rs")]
+#[cfg_attr(target_os = "windows", path = "windows.rs")]
 mod imp;
 
 /// Obtain the number of threads currently part of the active process. Returns `None` if the number
