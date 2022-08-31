@@ -39,6 +39,15 @@ mod test {
     }
 
     #[test]
+    fn require_test_threads_1() {
+        if super::is_single_threaded() != Some(true) {
+            panic!(
+                "Process is not single-threaded. Are you running `cargo test -- --test-threads=1`?"
+            );
+        }
+    }
+
+    #[test]
     fn num_threads() {
         threaded! {
             assert_eq!(super::num_threads().map(NonZeroUsize::get), Some(1));
