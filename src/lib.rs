@@ -18,4 +18,3 @@ pub fn num_threads() -> Option<NonZeroUsize> {
 pub fn is_single_threaded() -> Option<bool> {
     num_threads().map(|n| n.get() == 1)
 }
-
