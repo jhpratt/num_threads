@@ -16,3 +16,8 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios", target_os = "freebsd"))'.dependencies]
 libc = "0.2.107"
+
+[[test]]
+name = "tests"
+path = "tests.rs"
+harness = false
