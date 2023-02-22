@@ -3,7 +3,13 @@ extern crate libc;
 use std::num::NonZeroUsize;
 use std::{mem, ptr};
 
-use self::libc::{c_int, c_void, kinfo_proc, sysctl};
+use self::libc::{c_char, c_int, c_void, kinfo_proc, sysctl};
+
+const KINFO_PROC_LEN: usize = mem::size_of::<kinfo_proc>();
+
+// From sys/sys/proc.h
+const SZOMB: c_char = 5;
+const SDEAD: c_char = 6;
 
 pub(crate) fn num_threads() -> Option<NonZeroUsize> {
     // Safety: `sysctl` and `getpid` are both thread-safe.
@@ -16,7 +22,6 @@ pub(crate) fn num_threads() -> Option<NonZeroUsize> {
         // and once to actually retrieve the list.
 
         let pid = libc::getpid();
-        let expected_kip_len = mem::size_of::<kinfo_proc>();
 
         // Unlike The other BSDs, OpenBSD has us pass in the size of the struct
         // we expect and how many items we believe fits in our buffer.
@@ -29,7 +34,7 @@ pub(crate) fn num_threads() -> Option<NonZeroUsize> {
             libc::KERN_PROC,
             libc::KERN_PROC_PID | libc::KERN_PROC_SHOW_THREADS,
             pid,
-            expected_kip_len as c_int,
+            KINFO_PROC_LEN as c_int,
             0,
         ];
         let mut kip_len = 0;
@@ -49,10 +54,10 @@ pub(crate) fn num_threads() -> Option<NonZeroUsize> {
 
         // libkvm's kvm_getprocs() rounds up its buffer by 1/8th.
         // Instead we round up the number of items.
-        let mut nitems = kip_len / expected_kip_len;
+        let mut nitems = kip_len / KINFO_PROC_LEN;
         nitems += nitems / 8;
         mib[5] = nitems as c_int;
-        kip_len = expected_kip_len * nitems;
+        kip_len = KINFO_PROC_LEN * nitems;
 
         let mut kips: Vec<kinfo_proc> = Vec::with_capacity(nitems);
 
@@ -71,15 +76,20 @@ pub(crate) fn num_threads() -> Option<NonZeroUsize> {
 
         // A final sanity check before we blindly accept what we've been given.
         // Failure here would indicate a serious ABI breakage.
-        assert!(kip_len % expected_kip_len == 0);
-        assert!(kip_len <= expected_kip_len * nitems);
-        kips.set_len(kip_len / expected_kip_len);
+        assert!(kip_len % KINFO_PROC_LEN == 0);
+        assert!(kip_len <= KINFO_PROC_LEN * nitems);
+        kips.set_len(kip_len / KINFO_PROC_LEN);
 
-        // In principle we could instead just return kip_len / expected_kip_len - 1
-        // as we have a list of threads plus a p_tid == -1 entry for the process.
+        // p_tid = -1 is an entry for the process itself and should be ignored
+        // SZOMB and SDEAD checks match the P_ZOMBIE check in /sys/sys/proc.h
         NonZeroUsize::new(
             kips.into_iter()
-                .filter(|kip| kip.p_pid == pid && kip.p_tid != -1)
+                .filter(|kip| {
+                    kip.p_pid == pid
+                        && kip.p_tid != -1
+                        && kip.p_stat != SZOMB
+                        && kip.p_stat != SDEAD
+                })
                 .count(),
         )
     }
