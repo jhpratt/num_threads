@@ -1,7 +1,7 @@
-use std::num::NonZeroUsize;
-use std::io::{BufReader, Read, Seek, SeekFrom};
-use std::fs::File;
 use std::convert::TryFrom;
+use std::fs::File;
+use std::io::{BufReader, Read, Seek, SeekFrom};
+use std::num::NonZeroUsize;
 
 // https://www.ibm.com/docs/en/aix/7.3?topic=files-proc-file
 //
@@ -18,8 +18,6 @@ pub(crate) fn num_threads() -> Option<NonZeroUsize> {
     // Read 4 bytes after initial 12 bytes and convert into 32-byte uint.
     file.read_exact(&mut buffer).ok()?;
     let nlwp_bytes = <[u8; 4]>::try_from(&buffer[12..16]).ok()?;
-    let nlwp = unsafe {
-        std::mem::transmute::<[u8; 4], u32>(nlwp_bytes)
-    };
+    let nlwp = unsafe { std::mem::transmute::<[u8; 4], u32>(nlwp_bytes) };
     NonZeroUsize::new(nlwp as usize)
 }
