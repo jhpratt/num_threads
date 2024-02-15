@@ -1,3 +1,7 @@
+# 0.1.7
+
+Fix memory leak on Apple platforms
+
 # 0.1.6
 
 - Avoid heap allocation on FreeBSD
