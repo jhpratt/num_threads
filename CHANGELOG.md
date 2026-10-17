@@ -1,3 +1,9 @@
+# 0.1.8
+
+- Fall back to `/proc/self/status` on Linux when reading `/proc/self/stat` fails
+- Report the correct thread count when running under Rosetta on macOS
+- Drop support for 32-bit Apple targets
+
 # 0.1.7
 
 Fix memory leak on Apple platforms
