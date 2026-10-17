@@ -1,10 +1,6 @@
-extern crate libc;
-
 use std::num::NonZeroUsize;
 
-use self::libc::{
-    kern_return_t, mach_port_t, natural_t, task_threads, thread_act_array_t, vm_size_t,
-};
+use libc::{kern_return_t, mach_port_t, natural_t, task_threads, thread_act_array_t, vm_size_t};
 
 #[allow(non_camel_case_types)]
 // https://developer.apple.com/documentation/kernel/mach_port_name_t

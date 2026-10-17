@@ -1,8 +1,6 @@
-extern crate num_threads;
-
 use std::num::NonZeroUsize;
 
-use num_threads::*;
+use num_threads::{is_single_threaded, num_threads};
 
 // Run each expression in its own thread.
 macro_rules! threaded {
@@ -11,7 +9,7 @@ macro_rules! threaded {
     };
     ($first:expr; $($rest:expr;)*) => {
         $first;
-        ::std::thread::spawn(|| {
+        std::thread::spawn(|| {
             threaded!($($rest;)*);
         })
         .join()

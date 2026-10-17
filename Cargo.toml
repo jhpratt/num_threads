@@ -1,6 +1,7 @@
 [package]
 name = "num_threads"
 version = "0.1.7"
+edition = "2018"
 authors = ["Jacob Pratt <open-source@jhpratt.dev>"]
 repository = "https://github.com/jhpratt/num_threads"
 categories = ["api-bindings", "hardware-support", "os"]
