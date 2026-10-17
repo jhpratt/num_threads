@@ -16,6 +16,11 @@ mod imp;
 
 /// Obtain the number of threads currently part of the active process. Returns `None` if the number
 /// of threads cannot be determined.
+///
+/// On macOS, when running under Rosetta, this excludes one thread as an estimate for Rosetta's
+/// exception-server thread. macOS exposes whether the process is translated but does not provide a
+/// reliable count of Rosetta-managed threads, so this adjustment may not exactly reflect the
+/// number of application threads.
 pub fn num_threads() -> Option<NonZeroUsize> {
     imp::num_threads()
 }

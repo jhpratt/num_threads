@@ -43,7 +43,35 @@ pub(crate) fn num_threads() -> Option<NonZeroUsize> {
             );
         }
 
-        NonZeroUsize::new(thread_count as usize)
+        let rosetta_thread_count = {
+            #[cfg(target_os = "macos")]
+            {
+                let mut translated: libc::c_int = 0;
+                let mut size = std::mem::size_of_val(&translated);
+                let result = unsafe {
+                    libc::sysctlbyname(
+                        b"sysctl.proc_translated\0".as_ptr() as *const libc::c_char,
+                        &mut translated as *mut _ as *mut libc::c_void,
+                        &mut size,
+                        std::ptr::null_mut(),
+                        0,
+                    )
+                };
+
+                // Rosetta's exception-server thread is included by task_threads, but is not an
+                // application thread.
+                if result == 0 && translated == 1 { 1 } else { 0 }
+            }
+
+            #[cfg(not(target_os = "macos"))]
+            {
+                0
+            }
+        };
+
+        (thread_count as usize)
+            .checked_sub(rosetta_thread_count)
+            .and_then(NonZeroUsize::new)
     } else {
         None
     }
