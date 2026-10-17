@@ -1,8 +1,11 @@
 name: Build
 
 concurrency:
-  group: build-${{ github.head_ref }}
+  group: build-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 env:
   CARGO_INCREMENTAL: 0
@@ -32,8 +35,6 @@ jobs:
     strategy:
       matrix:
         target:
-          #  name: Windows
-          #  triple: x86_64-pc-windows-gnu
           - name: Linux
             triple: x86_64-unknown-linux-gnu
             host: ubuntu-latest
@@ -52,110 +53,79 @@ jobs:
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@1.54.0
         with:
-          profile: minimal
-          toolchain: 1.54.0
-          target: ${{ matrix.target.triple }}
-          override: true
+          targets: ${{ matrix.target.triple }}
 
       - name: Cache cargo output
-        uses: Swatinem/rust-cache@v1
+        uses: Swatinem/rust-cache@v2
         with:
           key: ${{ matrix.target.triple }}
 
       - name: Type checking
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: --target ${{ matrix.target.triple }}
+        run: cargo check --target ${{ matrix.target.triple }}
 
   test:
-    name: Test (${{ matrix.target.name}})
+    name: Test (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.host }}
     if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) || github.event_name == 'push' }}
     strategy:
       matrix:
         target:
-          #  name: Windows
-          #  host: windows-latest
-          #  triple: x86_64-pc-windows-gnu
           - name: Linux
             host: ubuntu-latest
-            triple: x86_64-unknown-linux-gnu
           - name: macOS
             host: macos-latest
-            triple: x86_64-apple-darwin
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          target: ${{ matrix.target.triple }}
-          override: true
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo output
-        uses: Swatinem/rust-cache@v1
-        with:
-          key: ${{ matrix.target.triple }}
+        uses: Swatinem/rust-cache@v2
 
       - name: Test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: -- --test-threads=1
+        run: cargo test -- --test-threads=1
 
   fmt:
     name: Formatting
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) || github.event_name == 'push' }}
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@nightly
         with:
-          profile: minimal
-          toolchain: nightly
-          override: true
           components: rustfmt
 
       - name: Check formatting
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: -- --check
+        run: cargo fmt -- --check
 
   clippy:
     name: Clippy
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) || github.event_name == 'push' }}
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
+          components: clippy
 
       - name: Cache cargo output
-        uses: Swatinem/rust-cache@v1
+        uses: Swatinem/rust-cache@v2
 
       - name: Run clippy
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+        run: cargo clippy --all-targets -- -D warnings
