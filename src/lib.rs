@@ -1,4 +1,4 @@
-//! Minimum supported Rust version: 1.28
+//! Minimum supported Rust version: 1.54
 
 use std::num::NonZeroUsize;
 
